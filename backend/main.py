@@ -1,23 +1,60 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
-from pydantic import BaseModel
+from typing import Annotated
+import models
+from database import engine, SessionLocal
+from sqlalchemy.orm import Session
+
 
 app = FastAPI()
+models.Base.metadata.create_all(bind=engine) 
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins = ['*']
 )
 
-MainCounter : int = 0
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+db_dependency = Annotated[Session, Depends(get_db)]
+
+@app.post("/init")
+def init_counter(db: db_dependency):
+    counter = models.Counter(count=0)
+    db.add(counter)
+    db.commit()
+    return counter
+
 
 @app.get("/get_counter")
-def get_counter():
-    return MainCounter
+def get_counter(db: db_dependency):
+    counter = db.query(models.Counter).first()
+    if not counter:
+        raise HTTPException(status_code=404, detail="Counter not found")
+    return counter
 
 @app.post("/increase_counter")
-def increase_counter(newValue : int):
-    global MainCounter
-    MainCounter = int(newValue)
-    return MainCounter
+def increase_counter(db: db_dependency):
+    counter = db.query(models.Counter).first()
+    if not counter:
+        raise HTTPException(status_code=404, detail="Counter not found")
+    counter.count += 1
+    db.commit()
+    return counter.count
+
+
+@app.post("/reset_counter")
+def reset_counter(db: db_dependency):
+    counter = db.query(models.Counter).first()
+    if not counter:
+        raise HTTPException(status_code=404, detail="Counter not found")
+    counter.count = 0
+    db.commit()
+    return counter
+
