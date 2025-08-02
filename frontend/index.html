@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend</title>
+</head>
+<body>
+    <div class="counter"></div>
+    <button class="add" onclick="add()">add</button>
+    <button class="reset" onclick="reset()">reset</button>
+<script>
+    let counter = 0;
+    get();
+
+   async function reset() {
+        counter = 0
+        try {
+            let response = await fetch(`http://127.0.0.1:8000/increase_counter?newValue=${counter}`,{
+                method: 'POST'
+            }
+            );
+            setCounter()
+            console.log(await response.json())
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    async function add() {
+        counter++
+        try {
+            let response = await fetch(`http://127.0.0.1:8000/increase_counter?newValue=${counter}`,{
+                method: 'POST'
+            }
+            );
+            setCounter()
+            console.log(await response.json())
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    async function get() {
+        try {
+            let response = await fetch('http://127.0.0.1:8000/get_counter') 
+            counter = await response.json()
+            setCounter()
+            console.log(counter)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    function setCounter() {
+        document.querySelector('.counter').innerHTML = counter
+    }
+</script>
+</body>
+</html>
