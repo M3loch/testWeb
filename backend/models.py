@@ -1,4 +1,6 @@
-from sqlalchemy import Column, Integer
+from sqlalchemy import Table, Column, Integer, MetaData
+
+metadata = MetaData()
 
 from database import Base
 

@@ -4,7 +4,8 @@ from typing import Annotated
 import models
 from database import engine, SessionLocal
 from sqlalchemy.orm import Session
-
+import uvicorn
+from models import metadata
 
 app = FastAPI()
 models.Base.metadata.create_all(bind=engine) 
@@ -58,3 +59,5 @@ def reset_counter(db: db_dependency):
     db.commit()
     return counter
 
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
