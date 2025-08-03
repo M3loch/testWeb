@@ -1,11 +1,15 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import create_engine, MetaData, Table, Column, Integer
+from config import settings
 
-URL_DATABASE = "postgresql://postgres:1234@localhost:5432/CounterTestDB"
+metadata = MetaData()
 
-engine = create_engine(URL_DATABASE)
+engine = create_engine(
+    url=settings.DATABASE_URL()
+)
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-Base = declarative_base()
+counter_table = Table(
+    'counter',
+    metadata,
+    Column('id', Integer, primary_key=True),
+    Column('count', Integer)
+)
