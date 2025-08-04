@@ -3,8 +3,10 @@ from config import settings
 
 metadata = MetaData()
 
+print(settings.DATABASE_URL())
+
 engine = create_engine(
-    url=settings.DATABASE_URL()
+    url=settings.DATABASE_URL
 )
 
 counter_table = Table(

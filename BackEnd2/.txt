@@ -1,0 +1,70 @@
+https://www.youtube.com/watch?v=nC9ob8xM3AM&t=115s
+
+
+Enviromet setup 
+
+>>> python -m venv env
+>>> . env/Scripts/activate
+
+    create .env file 
+        DB_HOST
+        DB_PORT
+        DB_USER
+        DB_PASS
+        DB_NAME
+
+>>> pip install dotenv
+
+    create config.py with setting.db_url() which is returns DATABASE_URL
+
+>>> pip install fastapi, sqlalchemy, uvicorn, asyncio
+
+>>> pip freeze > requirements.txt
+
+    create main.py file which includes:
+
+        app = FastAPI()
+
+        @app.method("/adress")
+        def async functiuonName():
+            functionBody
+            return result
+
+        if __name__ == "__main__":
+            uvicorn.run(app, host="0.0.0.0", port=8000)
+
+    create db.py which is include:
+
+        engine = create_async_engine(
+            url = settings.db_url()
+        )
+
+
+        class Base(DeclarativeBase):
+            pass
+        //the declarative base used for communicate w/ sql db operating only by python objects and also includes MetaData 'bout all tables in the base
+    
+    create models.py which includes db class:
+
+        class counter(Base):
+            __tablename__ = 'counter'
+            
+            id : Mapped[int] = mapped_column(primary_key=True)
+            counter : Mapped[int] = mapped_column(nullable=False)
+
+            def __repr__(self) -> str:
+                return f"{self.id} : {self.counter}"
+
+    create db_init.py script which will be create database with all needed tables
+
+        async def db_init():
+            async with engine.begin() as conn:
+                
+                # deleting all existing tables if there is and createing new one which 
+                await conn.run_sync(Base.metadata.drop_all)
+                await conn.run_sync(Base.metadata.create_all)
+            
+            await engine.dispose()
+
+        asyncio.run(db_init())
+
