@@ -1,13 +1,11 @@
 from db import Base
 from sqlalchemy.orm import Mapped, mapped_column
 
-class counter(Base):
-    __tablename__ = 'counter'
+class test(Base):
+    __tablename__ = 'test'
     
     id : Mapped[int] = mapped_column(primary_key=True)
-    counter : Mapped[int] = mapped_column(nullable=False)
-
-    def __repr__(self) -> str:
-        return f"{self.id} : {self.counter}"
+    value : Mapped[int] = mapped_column(nullable=False)
+     
     
     

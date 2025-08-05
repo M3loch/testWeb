@@ -1,11 +1,10 @@
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.ext.asyncio import async_sessionmaker
 import uvicorn
+
 from CRUD import CRUD
 from db import engine
 
-session = async_sessionmaker(bind = engine)
 
 crud = CRUD()
 
@@ -13,8 +12,7 @@ app = FastAPI()
 
 @app.post("/init")
 async def init():
-    result = await crud.init(session)
-    return result
+    pass
 
 
 @app.get("/")
@@ -28,18 +26,15 @@ async def welcome():
 
 @app.get("/get")
 async def get():
-    result = await crud.get_counter(session)
-    return result
+    pass
 
 @app.post('/increase')
 async def increase():
-    result : int = 1
-    return result
+    pass
 
 @app.post('/reset')
 async def reset():
-    result : int = 0
-    return result
+    pass
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8000)

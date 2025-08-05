@@ -1,6 +1,10 @@
+# dataBase Initialisation script
+
+
 from db import Base, engine
-from models import counter
+from models import test
 import asyncio
+
 
 
 async def db_init():

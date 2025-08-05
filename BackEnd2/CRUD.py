@@ -1,37 +1,38 @@
-from models import counter
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from models import test
+from db import engine
+
+# async def main():
+#     async with engine.connect() as conn:
+#         res = await conn.execute(text("SELECT VERSION()"))
+#         print(res.first())
+
+async_session = async_sessionmaker(engine)
 
 class CRUD:
+    
+    async def get_all():
+        async with async_session() as session:
+            query = select(test)
+            result = await session.execute(query)
+            array = result.scalars().all()
+            print(array)
+    
+    async def get_by_id(id):
+        async with engine.connect() as session:
+            result = session.get(test, id)
+            print(result)
 
-    async def init(self, async_session: async_sessionmaker[AsyncSession]):
-        async with async_session() as session: 
+    async def add(val : int):
 
-            session.add(0)
+        async with async_session() as session:
 
+            new_value = test(value = val)
+            session.add(new_value)
             await session.commit()
 
+    async def set_value(id:int, value:int):
+        async with async_session as session:
+            store = await session.get
 
-    async def get_counter(self, async_session: async_sessionmaker[AsyncSession]):
-        async with async_session() as session: 
-            statment = select(counter).order_by(counter.id)
-
-            result = await session.execute(statment)
-            print(result.scalars().all())
-            return result.scalars().all()
-
-    async def increase(self, async_session: async_sessionmaker[AsyncSession]):
-        async with async_session() as session: 
-            counter = await self.get_counter(session)
-
-            counter.counter = counter.counter + 1
-
-            await session.commit()
-
-    async def reset(self, async_session: async_sessionmaker[AsyncSession]):
-        async with async_session() as session: 
-            counter = await self.get_counter(session)
-
-            counter.counter = 0
-
-            await session.commit()
