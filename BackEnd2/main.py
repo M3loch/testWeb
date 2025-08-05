@@ -1,8 +1,21 @@
 from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.ext.asyncio import async_sessionmaker
 import uvicorn
+from CRUD import CRUD
+from db import engine
+
+session = async_sessionmaker(bind = engine)
+
+crud = CRUD()
 
 app = FastAPI()
+
+@app.post("/init")
+async def init():
+    result = await crud.init(session)
+    return result
+
 
 @app.get("/")
 async def welcome():
@@ -15,7 +28,7 @@ async def welcome():
 
 @app.get("/get")
 async def get():
-    result : int = 0
+    result = await crud.get_counter(session)
     return result
 
 @app.post('/increase')
