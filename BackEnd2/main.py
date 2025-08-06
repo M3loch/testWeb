@@ -4,37 +4,56 @@ import uvicorn
 
 from CRUD import CRUD
 from db import engine
+from schemas import TestPostDTO, TestGetDTO
+import asyncio
+
 
 
 crud = CRUD()
 
 app = FastAPI()
 
-@app.post("/init")
-async def init():
-    pass
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins = ['*'],   
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
-@app.get("/")
-async def welcome():
-    return {
-            "welcome":"/",
-            "get":"/get",
-            "increase":"/increase",
-            "reset":"/reset"
-            }
 
 @app.get("/get")
 async def get():
-    pass
+    res = await CRUD.get_all()
+    return res
 
-@app.post('/increase')
-async def increase():
-    pass
+@app.get('/get_by_id/{id}')
+async def get_by_id(id):
+    try:
+        res = await CRUD.get_by_id(int(id))
+        return res
+    except Exception as e:
+        print(f"{e}")
 
-@app.post('/reset')
-async def reset():
-    pass
+@app.post('/add')
+async def add(newValue: TestPostDTO):
+    try:
+        res = await CRUD.add(newValue.value)
+        return res
+    except Exception as e:
+        print(f"{e}")
+
+
+@app.put('/update')
+async def update(newValue: TestGetDTO):
+     res = await CRUD.set_value(newValue.id, newValue.value)
+     return res 
+
+@app.delete('/delete/{id}')
+async def delete(id : int):
+    res = await CRUD.delete(id)
+    return res
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000)

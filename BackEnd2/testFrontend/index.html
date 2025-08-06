@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <button class="get_all">Get all</button>
+    <button class="get_by_id">Get by id</button>
+    <button class="update">Update</button>
+    <button class="add">Add New Value</button>
+    <button class="delete">Delete</button>
+
+    <div class="id_input">
+        <input type="text" class="id" placeholder="id">
+    </div>
+    <div class="value_input">
+        <input type="text" class="value" placeholder="value">
+    </div>
+    <div class="list"></div>
+<script>
+
+    async function get_all() {
+        const res = await fetch ('http://127.0.0.1:8000/get')
+        const json = await res.json()
+        const html = json.reduce((str, obj) => str += `<span>>>>: </span> id = ${obj.id} => value = ${obj.value}<br>`, '')
+        return html
+    }
+
+    async function get_by_id(id) {
+
+        const response = await fetch (`http://127.0.0.1:8000/get_by_id/${id}`)
+        const value = await response.json()
+
+        if(!value) {
+            return `<span>>>>: </span>"${id}" Is A Wrong Query or Return With Code 404<br>`
+        }
+
+        return `<span>>>>: </span> id = ${id} => value = ${value}<br>`
+    }
+
+    async function add(Query) {
+
+        console.log(JSON.stringify(Query))
+            const response = await fetch('http://localhost:8000/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(Query)
+            })
+            console.log(response)
+            return await response.json()
+    }
+    
+    async function update(i, v) {
+        response = await fetch('http://127.0.0.1:8000/update',
+            {
+                method : "PUT",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body : JSON.stringify({
+                    value: v,
+                    id: i
+                })
+            }
+        )
+        return await response.json()
+        
+    }
+
+    async function delete_by_id(id) {
+        id = Number(id)
+        const response = await fetch(`http://127.0.0.1:8000/delete/${id}`,
+            {
+                method : "DELETE",
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }
+        )
+        const result = response.json()
+        return result
+
+    }
+    document.querySelector('.get_all').addEventListener('click', async () => {
+            document.querySelector('.list').innerHTML = await get_all()
+    })
+
+    document.querySelector('.get_by_id').addEventListener('click', async () => {
+            const value = document.querySelector('.id').value
+            const id = Number(value)
+            if (id) {
+                document.querySelector('.list').innerHTML += await get_by_id(Number(document.querySelector('.id').value))
+            } else {
+                document.querySelector('.list').innerHTML += `<span>>>>: </span> "${value}" Is A Wrong Query or Return With Code 404<br>`
+            }
+            document.querySelector('.id').value = ''
+    })
+
+    document.querySelector('.add').addEventListener('click', async () => {
+        const value = document.querySelector('.value').value
+        const Query = {
+            value: Number(value)
+        }
+        const response_id = await add(Query)
+        document.querySelector('.list').innerHTML += `<span>>>>: </span> value "${value}" added with id ${response_id}<br>`
+    })
+
+    document.querySelector('.update').addEventListener('click', async ()  => {
+        id = Number(document.querySelector('.id').value)
+        value = Number(document.querySelector('.value').value)
+
+        result = await update(id, value)
+        if (result) {
+            document.querySelector('.list').innerHTML += `<span>>>>: </span> object with id = ${id} succesfuly updated<br>`
+        }
+        
+    })
+
+    document.querySelector('.delete').addEventListener('click', async () => {
+        const id = Number(document.querySelector('.id').value) 
+        const result = await delete_by_id(id)
+        if (result) {
+            document.querySelector('.list').innerHTML += `<span>>>>: </span> object with id = ${id} succesfuly deleted<br>`
+        }
+    })
+</script>
+</body>
+</html>
