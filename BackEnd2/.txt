@@ -9,8 +9,12 @@
                     config:
                         config.py
 
-                    CRUD:
-                        CRUD.py
+                    api:
+                        routes:
+                            user.py
+                            orders.py
+                            example.py
+                        handlers.py
 
                     models:
                         models.py
@@ -22,9 +26,11 @@
                 scripts:
                     db_init.py
                     app_init.py
+                    db_clean.py (ONLY FOR TESTING!!!)
             
             index.py
             readme
+            .gitignore
 
     ====    Stack:
     >>  pip install -r requirements.txt
@@ -97,9 +103,9 @@
     class get_schema(post_schema):
         id : int
 
-5 > CRUD.py
+5 > api/user.py
 
-    class CRUD:
+    class user_handlers:
 
         @staticmethod
         async def get():
@@ -137,7 +143,17 @@
                 return {"ok": False}
 
 
-6 > db_init.py
+6 > handlers.py
+
+    class API:
+
+        user_handlers = user_handlers()
+
+        orders_handlers = orders_handlers()
+
+        example_handlers = example_handlers() 
+
+7 > db_init.py
 
     async def db_init():
         try:
@@ -158,7 +174,7 @@
 
     asyncio.run(db_init())
 
-7 > index.py
+8 > index.py
 
     # DB Interface Object
     CRUD = CRUD()

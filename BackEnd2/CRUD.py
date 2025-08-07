@@ -2,6 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from models import test
 from db import engine
+import asyncio
 
 from schemas import TestGetDTO, TestPostDTO
 
@@ -31,7 +32,8 @@ class CRUD:
             await session.flush()
             new_id = new_value.id
             await session.commit()
-
+        
+        await asyncio.sleep(1)
         return new_id
             
 
