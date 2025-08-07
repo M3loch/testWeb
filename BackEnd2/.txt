@@ -1,81 +1,198 @@
-https://www.youtube.com/watch?v=nC9ob8xM3AM&t=115s
-https://www.youtube.com/watch?v=nB9Gn53QbkM&t=51s
+////    Enviromment setup:
+
+    >>  python -m venv env
+    >>  . env/Scripts/activate
+
+    ====  Folder_structure:
+            Root:
+                src:
+                    config:
+                        config.py
+
+                    CRUD:
+                        CRUD.py
+
+                    models:
+                        models.py
+                        schemas.py
+                env:
+                    .env
+                    requirements.txt
+
+                scripts:
+                    db_init.py
+                    app_init.py
+            
+            index.py
+            readme
+
+    ====    Stack:
+    >>  pip install -r requirements.txt
+
+    ===> FastAPI [standard]
+    ===> SQLAclhemy
+    ===> asyncpg
+    ===> pydantic
+    ===> dotenv
+    ===> asyncio
+    ===> uvicorn 
+
+    ====  .env
+
+    ===> DB_HOST=****
+    ===> DB_PORT=****
+    ===> DB_USER=****
+    ===> DB_PASS=****
+    ===> DB_NAME=****
+
+    ====    config.py
+
+    ===> Class Settnigs:
+            def db_url():
+                return url
+
+//// Development
 
 
-Enviromet setup 
+1 > app_init.py
 
->>>     python -m venv env
->>>     . env/Scripts/activate
+    def App_init():
 
-        create .env file 
-            DB_HOST
-            DB_PORT
-            DB_USER
-            DB_PASS
-            DB_NAME
+       app = FastAPI()
+    
+        app.add_middleware
+        (
+            CORSMiddleware,
+            allow_origins = ['*'],   
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
 
->>>     pip install dotenv
+        return app 
 
-        create config.py with setting.db_url() which is returns DATABASE_URL
-
->>>     pip install fastapi, sqlalchemy, uvicorn, asyncio
-
->>>     pip freeze > requirements.txt
-
-create main.py file which includes:
-    // this file is entry point for the API and includes all endpoints and CRUD functions
-
-    app = FastAPI()
-
-    @app.method("/adress")
-    def async functiuonName():
-        functionBody
-        return result
-
-    if __name__ == "__main__":
-        uvicorn.run(app, host="0.0.0.0", port=8000)
-
-
-create db.py which is include:
-    // this file is used for connecting to the database and creating the engine
+2 > db.py
 
     engine = create_async_engine(
         url = settings.db_url()
     )
 
-
-    //the declarative base used for communicate w/ sql db operating only by python objects and also includes MetaData 'bout all tables in the base
     class Base(DeclarativeBase):
         pass
 
-create models.py which includes db class:
-    // this file is used for creating the models for the database
-    
-    class counter(Base):
-        __tablename__ = 'counter'
-        
-        id : Mapped[int] = mapped_column(primary_key=True)
-        counter : Mapped[int] = mapped_column(nullable=False)
+3 > models.py
 
-        def __repr__(self) -> str:
-            return f"{self.id} : {self.counter}"
+    class model(Base):
+        __table__ = "table_name"
 
-create db_init.py script which will be create database with all needed tables
-    // this file is used for creating the database with all needed tables
+        id : Mapped[int] = mapped_column(primary_key = True)
+        value : Mapped[str] = mapped_column(nullable = False)
+????    foreign_key : Mapped[int] = mapped_column(foreign_key = True)
+
+4 > schemas.py
+
+    class post_schema(BaseModel):
+        value : str
+
+    class get_schema(post_schema):
+        id : int
+
+5 > CRUD.py
+
+    class CRUD:
+
+        @staticmethod
+        async def get():
+            async with async_session as session:
+                result = await session.get(get_schema)
+                return result    
+
+        @staticmethod
+        async def post(value):
+            id = none
+            async with async_session as session:
+                new = model(value = value)
+                result = await session.add(new)
+                await session.flush()
+                id = new.id
+                await session.commit()
+            return id
+
+        @staticmethod
+        async def update(id, value):
+            async with async_session() as session:
+                obj = await session.get(model, id)
+                obj.value = value
+                await session.commit()
+            return {"ok": True}
+
+        @staticmethod
+        async def delete(id):
+            async with async_session() as session:
+                obj = await session.get(model, id)
+                if obj:
+                    await session.delete(obj)
+                    await session.commit()
+                    return {"ok": True}
+                return {"ok": False}
+
+
+6 > db_init.py
 
     async def db_init():
-        async with engine.begin() as conn:
-            
-            // deleting all existing tables if there is and createing new one which is include all models from models.py
-            // when did MetaData is get all the models?
+        try:
+            async with engine.begin() as conn:
 
-            await conn.run_sync(Base.metadata.drop_all)
-            await conn.run_sync(Base.metadata.create_all)
-        
-        await engine.dispose()
+                await conn.run_sync(Base.metadata.drop_all)
+                await conn.run_sync(Base.metadata.create_all)
+
+                print("База данных успешно инициализирована")
+
+        except Exception as e:
+
+            print(f"Ошибка при инициализации БД: {e}")
+
+        finally:
+
+            await engine.dispose()
 
     asyncio.run(db_init())
 
+7 > index.py
 
-create CRUD.py which includes all CRUD functions:
+    # DB Interface Object
+    CRUD = CRUD()
 
+    #FastAPI Interface
+    app = App_init()
+
+    #API
+    @app.get("/get")
+    def get():
+    try:
+        CRUD.get()
+    except Exception as e:
+        print(f"e")
+
+
+    @app.post("/post")
+    def post():
+    try:
+        CRUD.post()
+    except Exception as e:
+        print(f"e")
+
+    @app.put("/update")
+    def update():
+    try:
+        CRUD.update()
+    except Exception as e:
+        print(f"e")
+
+    @app.delete("/delete")
+    def delete():
+    try:
+        CRUD.delete()
+    except Exception as e:
+        print(f"e")
+    
